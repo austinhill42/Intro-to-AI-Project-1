@@ -138,15 +138,60 @@ def depthFirstSearch(problem):
 
     print "Unable to find path!"
 
-
-
     # util.raiseNotDefined()
 
 
 def breadthFirstSearch(problem):
     "Search the shallowest nodes in the search tree first. [p 81]"
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    from game import Directions
+
+    open = util.Queue()
+    closed = []
+    moves = []
+
+    root = node(problem.getStartState(), None, None, 0)
+
+    open.push(root)
+
+    while not open.isEmpty():
+        curNode = open.pop()
+
+        if problem.isGoalState(curNode.state):
+
+            while curNode.parent != None:
+                moves.insert(0, {
+                    'North': Directions.NORTH,
+                    'South': Directions.SOUTH,
+                    'East' : Directions.EAST,
+                    'West' : Directions.WEST,
+                }[curNode.action])
+
+                curNode = curNode.parent
+
+            return moves
+
+        else:
+            children = problem.getSuccessors(curNode.state)
+            closed.append(curNode)
+
+            if len(children) > 0:
+                for child in range(len(children)):
+
+                    curChild = node(children[child][0], curNode, children[child][1], children[child][2])
+                    inClosed = False
+
+                    for i in range(len(closed)):
+                        if curChild.state == closed[i].state:
+                            inClosed = True
+                            break
+
+                    if not inClosed:
+                        open.push(curChild)
+
+    print "Unable to find path!"
+
+    #util.raiseNotDefined()
 
 
 def uniformCostSearch(problem):
@@ -165,7 +210,8 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
-    "*** YOUR CODE HERE ***"
+
+
     util.raiseNotDefined()
 
 

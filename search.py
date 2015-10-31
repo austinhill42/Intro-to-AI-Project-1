@@ -91,52 +91,51 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
 
-    from game import Directions
+    opened = util.Stack()  # Use a stack to visit nodes
+    closed = []  # List of visited nodes
+    moves = []  # List of moves to return once goal is found
 
-    open = util.Stack()
-    closed = []
-    moves = []
+    opened.push(node(problem.getStartState(), None, None, 0))  # Push root onto the stack
 
-    root = node(problem.getStartState(), None, None, 0)
+    while not opened.isEmpty():
+        current = opened.pop()  # Visit the node at the top of the stack
 
-    open.push(root)
+        if problem.isGoalState(current.state):  # At goal state
 
-    while not open.isEmpty():
-        curNode = open.pop()
-
-        if problem.isGoalState(curNode.state):
-
-            while curNode.parent != None:
-                moves.insert(0, {
-                    'North': Directions.NORTH,
-                    'South': Directions.SOUTH,
-                    'East' : Directions.EAST,
-                    'West' : Directions.WEST,
-                }[curNode.action])
-
-                curNode = curNode.parent
+            # Starting at current node and not exceeding root, insert the node
+            # action into moves at beginning for correct order, and then return moves
+            while current.parent is not None:
+                moves.insert(0, current.action)
+                current = current.parent
 
             return moves
 
-        else:
-            children = problem.getSuccessors(curNode.state)
-            closed.append(curNode)
+        else:  # Not at goal state
+            children = problem.getSuccessors(current.state)  # Get list of children
+            closed.append(current)  # Add current node to visited list
 
-            if len(children) > 0:
-                for child in range(len(children)):
+            if len(children) > 0:  # Children exist
+                """
+                For the medium maze, adding successors in reverse order using
+                    for i in reversed(range(len(children)))
+                results in a length of 246 while the loop below results in a length of 146,
+                so I chose to go with the latter
+                """
+                for i in range(len(children)):
 
-                    curChild = node(children[child][0], curNode, children[child][1], children[child][2])
-                    inClosed = False
+                    child = node(children[i][0], current, children[i][1],
+                                 children[i][2])  # Create a node for each child
+                    visited = False  # Reset visited
 
-                    for i in range(len(closed)):
-                        if curChild.state == closed[i].state:
-                            inClosed = True
+                    for j in range(len(closed)):  # Search for child in closed
+                        if child.state == closed[j].state:
+                            visited = True
                             break
 
-                    if not inClosed:
-                        open.push(curChild)
+                    if not visited:  # If not in closed, push child onto stack
+                        opened.push(child)
 
-    print "Unable to find path!"
+    print "Unable to find path!"  # Either no path exists or open was somehow empty before one was found
 
     # util.raiseNotDefined()
 
@@ -144,54 +143,47 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     "Search the shallowest nodes in the search tree first. [p 81]"
 
-    from game import Directions
+    opened = util.Queue()  # Use a queue to visit nodes
+    closed = []  # List of visited nodes
+    moves = []  # List of moves to return once goal is found
 
-    open = util.Queue()
-    closed = []
-    moves = []
+    opened.push(node(problem.getStartState(), None, None, 0))  # Push root into the queue
 
-    root = node(problem.getStartState(), None, None, 0)
+    while not opened.isEmpty():
+        current = opened.pop()  # Visit the node at the front of the queue
 
-    open.push(root)
+        if problem.isGoalState(current.state):  # At goal state
 
-    while not open.isEmpty():
-        curNode = open.pop()
-
-        if problem.isGoalState(curNode.state):
-
-            while curNode.parent != None:
-                moves.insert(0, {
-                    'North': Directions.NORTH,
-                    'South': Directions.SOUTH,
-                    'East' : Directions.EAST,
-                    'West' : Directions.WEST,
-                }[curNode.action])
-
-                curNode = curNode.parent
+            # Starting at current node and not exceeding root, insert the node
+            # action into moves at beginning for correct order, and then return moves
+            while current.parent is not None:
+                moves.insert(0, current.action)
+                current = current.parent
 
             return moves
 
-        else:
-            children = problem.getSuccessors(curNode.state)
-            closed.append(curNode)
+        else:  # Not at goal state
+            children = problem.getSuccessors(current.state)  # Get list of children
+            closed.append(current)  # Add current node to visited list
 
-            if len(children) > 0:
-                for child in range(len(children)):
+            if len(children) > 0:  # Children exist
+                for i in range(len(children)):
 
-                    curChild = node(children[child][0], curNode, children[child][1], children[child][2])
-                    inClosed = False
+                    child = node(children[i][0], current, children[i][1],
+                                 children[i][2])  # Create a node for each child
+                    visited = False  # Reset visited
 
-                    for i in range(len(closed)):
-                        if curChild.state == closed[i].state:
-                            inClosed = True
+                    for j in range(len(closed)):  # Search for child in closed
+                        if child.state == closed[j].state:
+                            visited = True
                             break
 
-                    if not inClosed:
-                        open.push(curChild)
+                    if not visited:  # If not in closed, push child into queue
+                        opened.push(child)
 
-    print "Unable to find path!"
+    print "Unable to find path!"  # Either no path exists or open was somehow empty before one was found
 
-    #util.raiseNotDefined()
+    # util.raiseNotDefined()
 
 
 def uniformCostSearch(problem):
@@ -210,7 +202,6 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
-
 
     util.raiseNotDefined()
 

@@ -200,10 +200,89 @@ def nullHeuristic(state, problem=None):
     return 0
 
 
-def aStarSearch(problem, heuristic=nullHeuristic):
+def aStarSearch(problem, heuristic):
     "Search the node that has the lowest combined cost and heuristic first."
 
-    util.raiseNotDefined()
+    import sys
+    opened = util.PriorityQueue()  # Use a queue to visit nodes
+    closed = []  # List of visited nodes
+    moves = []  # List of moves to return once goal is found
+
+    rootHeuristic = heuristic(problem.getStartState(), problem)
+    root = node(problem.getStartState(), None, None, 0)
+    opened.push(root, rootHeuristic)  # Push root into the queue
+
+    while not opened.isEmpty():
+        current = opened.pop()  # Visit the node at the front of the queue
+
+        if problem.isGoalState(current.state):  # At goal state
+
+            # Starting at current node and not exceeding root, insert the node
+            # action into moves, and then return moves
+            while current.parent is not None:
+                moves.insert(0, current.action)
+                current = current.parent
+
+            return moves
+
+        else:  # Not at goal state
+            children = problem.getSuccessors(current.state)  # Get list of children
+
+            if len(children) > 0:  # Children exist
+                for i in range(len(children)):
+
+                    child = node(children[i][0], current, children[i][1],
+                                 children[i][2] + 1)  # Create a node for each child
+
+                    onOpen = onClosed = False  # Reset visited states
+
+                    # Search the opened queue for child
+                    if not opened.isEmpty():
+                        first = opened.pop()  # Placeholder for the beginning of the queue
+                        opened.push(first, heuristic(first.state, problem))
+
+                        while True:
+                            temp = opened.pop()  # Get next item in queue
+
+                            if temp.state == first.state:  # Avoid searching the queue more than once
+                                opened.push(temp, heuristic(temp.state, problem))  # Put temp back in opened
+                                break
+
+                            if child.state == temp.state:  # Child is already in opened
+                                onOpen = True
+
+                                # Push the node with the shortest path
+                                if child.pathCost < temp.pathCost:
+                                    opened.push(child, heuristic(child.state, problem))
+                                else:
+                                    opened.push(temp, heuristic(temp.state, problem))
+
+                                break
+
+                            else:  # Put temp back in opened
+                                opened.push(temp, heuristic(temp.state, problem))
+
+                    for k in range(len(closed)):  # Search for child in closed
+                        if child.state == closed[k].state:
+                            onClosed = True
+
+                            # If child has shorter path, delete it from closed and push it onto opened
+                            if child.pathCost < closed[k].pathCost:
+                                for l in range(k, len(closed) - 1):
+                                    closed[l] = closed[l + 1]
+
+                                closed[l] = None  # Remove duplicate last value
+
+                                opened.push(child, heuristic(child.state, problem))
+
+                            break
+
+                    if not onOpen and not onClosed:  # If not in closed or opened, push child onto queue
+                        opened.push(child, heuristic(child.state, problem))
+
+            closed.append(current)  # Mark current node as visited
+
+    print "Unable to find path!"  # Either no path exists or open was somehow empty before one was found
 
 
 # Abbreviations
